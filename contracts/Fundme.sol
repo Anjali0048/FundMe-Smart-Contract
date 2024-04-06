@@ -21,14 +21,17 @@ contract FundMe {
     // immutable -> can be set inside the constructor but cannot be modified afterwards and costs less gas fee.
     address public immutable i_owner;
 
-    constructor() {  // will be called when deployed
+    AggregatorV3Interface public priceFeed;
+
+    constructor(address priceFeedAddress) {  // will be called when deployed
         i_owner = msg.sender;
+        priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     // msg.sender -> sender of the message
     // msg.value -> number of wei send with the message
     function fund() public payable {
-        require(msg.value.getConversionRate() >= MINIMUM_USD, "Didn't send enough!");  // 1e18 = 1*10**18
+        require(msg.value.getConversionRate(priceFeed) >= MINIMUM_USD, "Didn't send enough!");  // 1e18 = 1*10**18
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] = msg.value;
     } 
